@@ -1,6 +1,9 @@
 ---
 layout: post
 title:  "Unlocking a Linksys Velop Router"
+subtitle: "Debranding the MX4200"
+date: 2025-07-11 20:00:00
+background: '/assets/images/2025/07/11/linksys_velop.jpg'
 ---
 
 # Background
