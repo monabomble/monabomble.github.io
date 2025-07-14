@@ -21,7 +21,7 @@ Now the first MX4200 I tried was simple. You can download official firmware file
 
 {% include image-link.html image_path="/assets/images/2025/07/11/linksys_firmware_update.png" alt_text="The Linksys firmware update screen" link="#" caption="Simples?" width="75%" %}
 
-Flushed with success, I then tried the OpenWRT firmware which is available from the [MX4200 product page on the OpenWRT site](https://openwrt.org/toh/linksys/mx4200_v1_and_v2). This also worked just fine and I was excited to some nifty graphs regarding wireless signal strength.
+Flushed with success, I then tried the OpenWRT firmware which is available from the [MX4200 product page on the OpenWRT site](https://openwrt.org/toh/linksys/mx4200_v1_and_v2). This also worked just fine and I was excited to find some nifty graphs regarding wireless signal strength.
 
 {% include image-link.html image_path="/assets/images/2025/07/11/wireless_graphs.png" alt_text="OpenWRT's Wireless status page" link="#" caption="Who doesn't love a graph?" width="75%" %}
 
@@ -70,7 +70,7 @@ The simplest way to make use of these pins is to buy a cheap UART-to-serial USB 
 
 On the adaptor, note the 6 labelled pins opposite the USB male end. These can be easily connected to using female-to-female push fit connectors (known as [Dupont cables](https://www.amazon.co.uk/Dupont-Female-Solderless-Breadboard-Connectors/dp/B0BLZC3SQ2)). First you can use a cable to link the ground pins on the PCB and your adaptor. You then connect the TX (transmit) pin from the MX4200 to the RX (receive) pin on your adaptor. Finally you connect the RX pin from the MX4200 to the TX pin on your adaptor. In this case you can ignore the VCC (power) pin as the MX4200 PCB will provide the power itself. With these 3 pins connected you can plug the USB end of the adaptor into your computer.
 
-On your PC (assuming you are using Linux - search around for doing this on Windows), you'll find that a new device `/dev/ttyUSB0` has been registered. You can use a terminal emulator program like screen or minicom to connect to the MX4200 via this adaptor. I prefer minicom so I'll install this and then run it like so:
+On your PC (assuming you are using Linux - search around for doing this on Windows), you'll find that a new device `/dev/ttyUSB0` has been registered. You can use a terminal emulator program like screen or minicom to connect to the MX4200 via this adaptor. I prefer minicom so I installed this and ran it like so:
 
 ```
 sudo apt install minicom
@@ -133,6 +133,6 @@ Fortunately, the script gives us some clues as to how we can overcome this. We h
 # syscfg set fwup_softsku_name MX42
 ```
 
-Ta-da. Now the check will pass and we can install retail images again. Using the instructions linked above we can flash stock Linksys firmare and then using the 'CA settings' (casupport) trick, we can manually upgrade the device to the latest OpenWRT image. Phew!
+Ta-da. Now the check will pass and we can install retail images again. Using the instructions linked above we can flash stock Linksys firmware and then using the 'CA settings' (casupport) trick, we can manually upgrade the device to the latest OpenWRT image. Phew!
 
 As is the point of this blog, I hope this either helps you with your own de-branding project or you found it somewhat interesting. If you've found an easier way to do this drop me an email (I don't 'do' Twitter/X/MechaHitler) or alternatively post something in the [Linksys Velop Reddit thread](https://www.reddit.com/r/LinksysVelop). I'm sure your effort will be much appreciated.
