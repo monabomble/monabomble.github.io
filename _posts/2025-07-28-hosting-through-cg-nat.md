@@ -2,7 +2,7 @@
 layout: post
 title:  "Self-hosting services behind Carrier Grade NAT"
 subtitle: "How to save money on a static IP"
-date: 2025-07-28 08:00:00
+date: 2025-07-28 01:00:00
 background: '/assets/images/2025/07/28/wireguard_traffic.png'
 ---
 
@@ -100,17 +100,17 @@ There are a number of free DDNS providers with various options and fees if you n
 <tr>
 <td>No IP</td>
 <td>Free (for one domain)</td>
-<td span="markdown">*.no-ip.org</td>
+<td span="markdown">&#42;.no-ip.org</td>
 </tr>
 <tr>
 <td>Free DNS</td>
 <td>Free (for 5 subdomains)</td>
-<td span="markdown">*.afraig.org</td>
+<td span="markdown">&#42;.afraig.org</td>
 </tr>
 <tr>
 <td>Duck DNS</td>
 <td>Free</td>
-<td span="markdown">*.duckdns.org</td>
+<td span="markdown">&#42;.duckdns.org</td>
 </tr>
 </tbody>
 </table>
