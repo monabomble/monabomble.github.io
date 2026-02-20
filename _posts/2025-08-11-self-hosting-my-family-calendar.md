@@ -2,8 +2,10 @@
 layout: post
 title:  "Swapping Google Calendar for a self-hosted equivalent"
 subtitle: "The magic of CalDAV"
+author: Andy
+category: networking
 date: 2025-08-11 01:00:00
-background: '/assets/images/2025/08/11/calendar.jpg'
+cover: "/assets/images/2025/08/11/calendar.jpg"
 ---
 
 # Why would anyone want to do this?
@@ -12,7 +14,7 @@ In my last post, I set up the basic infrastructure to host web services from my 
 
 The first service I wanted to host was a shared calendar, so that my wife and I could manage our busy schedules (and the even busier schedules of our kids). Until recently, we had been using Google Calendar, which I must admit was terribly convenient. That said, I wrote previously about wanting to take some small steps into reclaiming ownership of some of my data. The majority of internet users are probably happy to use major service providers such as Google, Apple, Microsoft, etc. After all, these services have the benefit of "five nines" availability (i.e. 99.999% uptime), data resilience (a fire in one data center probably won't wipe out all your data) and are often completely freeeeeeee.
 
-{% include image-link.html image_path="/assets/images/2025/08/11/google_calendar.webp" alt_text="Google calendar marketing image" link="#" caption="Google Calendar: Excellent, if you're happy to share with Google" width="75%" %}
+{% include image-link.html lightbox="google-calendar-1"  image_path="/assets/images/2025/08/11/google_calendar.webp" alt_text="Google calendar marketing image"  caption="Google Calendar: Excellent, if you're happy to share with Google" width="75%" %}
 
 
 Except they aren't. The old adage "there's no such thing as a free lunch" still rings true today. If you dig into the T's & C's of these services you'll find that the provider is often quite clear that the data you upload to their services isn't necessarily *yours* anymore... you effectively give the provider permission to use it in any number of ways. Some of these appear positive and proactive (notifying you of suspicious account activity if something occurs that doesn't follow your regular pattern of life). Others are less positive, such as influencing you to make certain decisions (where to shop, who to vote for, etc.). Here's a snippet from Google's Privacy Policy at the time of writing:
@@ -32,7 +34,7 @@ CalDAV stands for Calendar Distributed Authoring and Versioning. It is effective
 
 
 
-{% include image-link.html image_path="/assets/images/2025/08/11/iCalendar.png" alt_text="An iCalendar object" link="#" caption="An example of an iCalendar object (Copyright: Wikipedia)" width="75%" %}
+{% include image-link.html lightbox="icalendar-1" image_path="/assets/images/2025/08/11/iCalendar.png" alt_text="An iCalendar object"  caption="An example of an iCalendar object (Copyright: Wikipedia)" width="75%" %}
 
 CalDAV stores and shares calendar events in this format and manages the access control elements of multiple user (i.e. shared) calendars. As it uses WebDAV to provide that access, this implies it runs on a web server. So that's naturally what we need first.
 
@@ -44,12 +46,14 @@ It is worth mentioning that a web server can have multiple services running at t
 
 We'll go through setting up a proper web server in a minute, but for now I can run a simple program which is packaged with the Python scripting language to fire up a web server which listens on TCP/80 and serves a simple file like so:
 
-```
+{% highlight bash %}
+
 mkdir /tmp/demo
 cd /tmp/demo
 echo "<p>Hello, World!" > index.html
 sudo python -m http.server 80
-````
+
+{% endhighlight %}
 
 The instructions above create a new temporary (until the next time I reboot this computer) directory with nothing else in it. The subsequent lines, change the working directory to the temporary directory and writes some Hypertext Markup Language (HTML) into a file called `index.html`. The last line switches the current user to the all-powerful 'root' user, just for this command, and runs a basic web server on TCP/80.
 
@@ -57,13 +61,15 @@ This change of user is temporarily required to bind a program (in this case Pyth
 
 As a final step I need to tell my VPS that it is now acting as a 'router'. That is, it needs to forward packets to another computer. I achieve this using the following command:
 
-```
+{% highlight bash %}
+
 sudo sysctl -w net.ipv4.ip_forward=1
-```
+
+{% endhighlight %}
 
 So now if I type in "http://", followed by the IP address of the web server on my home network, into my browser I see:
 
-{% include image-link.html image_path="/assets/images/2025/08/11/hello_world.png" alt_text="A screenshot of a basic web page" link="#" caption="Python's http.server module in action" width="75%" %}
+{% include image-link.html lightbox="hello-world-1" image_path="/assets/images/2025/08/11/hello_world.png" alt_text="A screenshot of a basic web page"  caption="Python's http.server module in action" width="75%" %}
 
 
 Now that our server is hosting a website (even if it contains only one web page that says hello), we can configure and test some changes to WireGuard to be able to access this website from the internet. On the computer running the web server we need to add the following lines to `/etc/wireguard/wg0.conf` under the `[Interface]` section (see [my previous post]({% post_url 2025-07-28-hosting-through-cg-nat %}){:target="_blank"} for details on WireGuard).
@@ -108,39 +114,46 @@ I've chosen to use the Apache HTTP Server on my home machine. This is very much 
 
 Assuming, we have closed our temporary Python-based 'web server' (to free up TCP/80), for Debian-based Linux distributions (such as Ubuntu and Raspbian) getting started is as simple as running the follow two commands:
 
-```
+{% highlight bash %}
+
 sudo apt install apache2
 sudo service apache2 start
-```
+
+{% endhighlight %}
 
 That's it! Now we have a web-sever running on TCP port 80. As I mentioned earlier, we have to install the Apache HTTP server using the 'root' user as it requires extra permission to open a service on that port. The difference between this and the `python` tool I used earlier, is that Apache doesn't process incoming requests within the same process as the one which sets up the socket (listening port).
 
 This is important because it means Apache can hand off the processing of potentially dangerous user-data to another process which has very few privileges assigned to it. If that process was exploited by a malicious user, the idea is that the damage would be limited. To check this we can run the `netstat` command on our web server machine to see what is listening on certain ports (edited for brevity):
 
-```
+
+{% highlight bash %}
+
 sudo netstat -lntp
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
 tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      682/apache2         
 tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      682/apache2
-```
+
+{% endhighlight %}
 
 So the program `apache2` is listening on TCP/80 and TCP/443 (I'll get onto this in a moment). However, when we list all the running processes with the name `apache2` we see this:
 
-```
+{% highlight base %}
+
 ps -fC apache2
 UID          PID    PPID  C STIME TTY          TIME CMD
 root         682       1  0 Jul16 ?        00:03:16 /usr/sbin/apache2 -k start
 www-data  180570     682  0 08:30 ?        00:00:02 /usr/sbin/apache2 -k start
 www-data  180571     682  0 08:30 ?        00:00:02 /usr/sbin/apache2 -k start
 ...
-```
+
+{% endhighlight %}
 
 We can see the main process has the User ID (UID) of 'root', but there are multiple (again edited for brevity) sub-processes that are running as the lower-privileged user 'www-data' which will process the requests. Note that the sub-processes have a Parent Process ID (PPID) of `682` which matches the Process ID (PID) of the main Apache process.
 
 So if we move our `index.html` that we created earlier to Apache HTTP Server's default **web root** `/var/www/html` we *should* now be able to get the "Hello, World!" page to load using the domain name of our VPS (e.g. `www.myawesomedomain.xyz`) from the internet!
 
-{% include image-link.html image_path="/assets/images/2025/08/11/hello_world_2.png" alt_text="A screenshot of a basic web page" link="#" caption="We've gone public!" width="75%" %}
+{% include image-link.html image_path="/assets/images/2025/08/11/hello_world_2.png" alt_text="A screenshot of a basic web page"  caption="We've gone public!" width="75%" %}
 
 Whilst it is always nice to be a published author (!) that ominous "Not Secure" warning is a bit of a buzzkill, so let's fix that.
 
@@ -150,7 +163,7 @@ When the World Wide Web first became a thing in the early 90s, most websites did
 
 Of course, over time, web sites became more interactive, which meant end-users were sending information to them rather than just downloading static pages of text. It started with simple data, a person's name or email address perhaps, but then websites started to have login pages which required a username and a password to access content. Anyone, who happened to own a computer (router) in the path that traffic took between client (user's browser) and server (website) could happily read all that data, steal passwords, personal messages, bank details, etc.
 
-{% include image-link.html image_path="/assets/images/2025/08/11/netscape-navigator.jpg" alt_text="Netscape Navigator splash screen" link="#" caption="Ahhhh those were the days" width="50%" %}
+{% include image-link.html image_path="/assets/images/2025/08/11/netscape-navigator.jpg" alt_text="Netscape Navigator splash screen"  caption="Ahhhh those were the days" width="50%" %}
 
 
 By 1996, the venerable Netscape Navigator browser (a genuinely magical bit of software in my mind), had introduced a mode of communicating called Secure Sockets Layer (SSL). Whilst it took many years for this technology to become prevalent, today you need to go out of your way to find a website that allows you to connect in an insecure fashion, where your data is sent 'as is' and not encrypted for transit. In fact, there are only a handful of websites that purposefully buck this trend such as [HTTP Forever](http://httpforever.com/){:target="_blank"} and the home of [the very first website](http://info.cern.ch/hypertext/WWW/TheProject.html){:target="_blank"} (Note: Ironically, if you click this link your browser will likely auto-redirect you to the HTTPS (secure) version, but you can manually remove the 's' and reload).
@@ -188,7 +201,7 @@ We touched upon the CalDAV protocol earlier in the post. There are a few open-so
 
 Once Baikal is up and running you can browse to the main page, login with the admin user that you set up during initial install and under 'Users and resources' you can start adding members as shown below.
 
-{% include image-link.html image_path="/assets/images/2025/08/11/baikal_add_user.png" alt_text="Adding a user to Baikal" link="#" caption="Adding a new user to Baikal" width="75%" %}
+{% include image-link.html image_path="/assets/images/2025/08/11/baikal_add_user.png" alt_text="Adding a user to Baikal"  caption="Adding a new user to Baikal" width="75%" %}
 
 
 The username and password are important as we'll use these in the next section to add each user's calendar to various client applications.
@@ -203,22 +216,22 @@ In fact, our main requirement was an Android client, as we primarily manage our 
 
 One thing to note about DAVx<sup>5</sup>, is that if you install it from Google Play it will cost you ~£5, whereas if you install F-Droid (the Free and Open Source Android App Repository), you can get it for free!
 
-{% include image-link.html image_path="/assets/images/2025/08/11/davx5_play_store.png" alt_text="Screenshot of DAVx5 for £4.99 on Google Play" link="#" caption="Only £4.99 from Google Play Store!" width="75%" %} 
+{% include image-link.html image_path="/assets/images/2025/08/11/davx5_play_store.png" alt_text="Screenshot of DAVx5 for £4.99 on Google Play"  caption="Only £4.99 from Google Play Store!" width="75%" %} 
 
 ## DAVx5 Setup
 
 Once you've installed DAVx<sup>5</sup>, you need to select the '+' button to add a new account. You'll first be prompted to select a login type, for which you need to select 'URL and user name' in the options below:
 
-{% include image-link.html image_path="/assets/images/2025/08/11/davx5_add_account.png" alt_text="Screenshot of adding a new account" link="#" caption="Adding a new account" width="50%" %} 
+{% include image-link.html image_path="/assets/images/2025/08/11/davx5_add_account.png" alt_text="Screenshot of adding a new account"  caption="Adding a new account" width="50%" %} 
 
 In the next screen you'll be prompted to enter the URL of you CalDAV server (e.g. `https://dav.myawesomedomain.xyz/dav.php`), the user name of one of your accounts and that user's password.
 
-{% include image-link.html image_path="/assets/images/2025/08/11/davx5_url_username.png" alt_text="Screenshot of adding URL and user name login" link="#" caption="URL and username login screen" width="50%" %} 
+{% include image-link.html image_path="/assets/images/2025/08/11/davx5_url_username.png" alt_text="Screenshot of adding URL and user name login"  caption="URL and username login screen" width="50%" %} 
 
 Once you've added all your users your main DAVx<sup>5</sup> screen should look a little something like this:
 
 
-{% include image-link.html image_path="/assets/images/2025/08/11/davx5_main_screen.png" alt_text="Screenshot showing accounts" link="#" caption="Accounts are added and in sync" width="50%" %} 
+{% include image-link.html image_path="/assets/images/2025/08/11/davx5_main_screen.png" alt_text="Screenshot showing accounts"  caption="Accounts are added and in sync" width="50%" %} 
 
 
 ## Etar Setup
@@ -228,7 +241,7 @@ I chose to use [Etar](https://github.com/Etar-Group/Etar-Calendar){:target="_bla
 Finally, Etar also supports Android 'Widgets' which means if you go to a blank area on your Android home screen and long press it you'll be prompted with a menu which includes 'Widgets'. Select this and scroll down to 'Etar' and you'll see you can add a nice 2x3 widget to display your upcoming events live. Awesome!
 
 
-{% include image-link.html image_path="/assets/images/2025/08/11/etar_widget.png" alt_text="Screenshot of Etar widget screen" link="#" caption="I was overly excited by this feature" width="50%" %} 
+{% include image-link.html image_path="/assets/images/2025/08/11/etar_widget.png" alt_text="Screenshot of Etar widget screen"  caption="I was overly excited by this feature" width="50%" %} 
 
 
 That's it for this post - I hope it was useful or interesting (or ideally both!).

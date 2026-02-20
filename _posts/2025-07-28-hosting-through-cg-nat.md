@@ -2,8 +2,10 @@
 layout: post
 title:  "Self-hosting services behind Carrier Grade NAT"
 subtitle: "How to save money on a static IP"
+author: Andy
+category: networking
 date: 2025-07-28 01:00:00
-background: '/assets/images/2025/07/28/wireguard_traffic.png'
+cover: '/assets/images/2025/07/28/wireguard_traffic.png'
 ---
 
 # A problem
@@ -14,7 +16,7 @@ That said, I also have a healthy resentment of hosting *everything* elsewhere, a
 
 I digress... the point is that I wanted to start self-hosting a few common services for myself and my family to use. How hard could it be?
 
-{% include image-link.html image_path="/assets/images/2025/07/28/under_construction.gif" alt_text="Under construction image" link="#" caption="I'm going to bring these back" width="50%" %}
+{% include image-link.html lightbox="under-construction-1" image_path="/assets/images/2025/07/28/under_construction.gif" alt_text="Under construction image"  caption="I'm going to bring these back" width="50%" %}
 
 For most people, it really isn't hard. Let's use the example of a web service. If you want to host your own website, it could be as simple as putting a PC in your router's De-militarized Zone (DMZ), which will allow all traffic through the firewall just to that PC. Once that's done you could install a simple web server, upload some files to your web root directory and away you go. We'll ignore the fact that, without significant tweaks, this could be a bad decision from a security perspective for now.
 
@@ -26,7 +28,7 @@ For home internet connections, you are normally assigned a public IP address fro
 
 There's a load of history and detail I'm skipping for brevity, but one of the consequences of this is that your router is still generally assigned a random IP address for a period of hours or days or weeks, but it isn't *yours* and can change. This is a problem if your domain name `www.notarealsite.xyz` was pointing to your computer on 1.2.3.4 but then your router's public IP changes to 4.5.6.7. Disappointed visitors would see something similar to this:
 
-{% include image-link.html image_path="/assets/images/2025/07/28/trouble_finding.png" alt_text="Firefox when you browse to an unknown address" link="#" caption="It took me a few goes to find an unregistered name..." width="75%" %}
+{% include image-link.html lightbox="trouble-finding-1" image_path="/assets/images/2025/07/28/trouble_finding.png" alt_text="Firefox when you browse to an unknown address"  caption="It took me a few goes to find an unregistered name..." width="75%" %}
 
 That's not ideal. So how can the aspiring self-hoster get round this? Well, one answer is requesting a *static IP address* from your ISP. This means you say "would you mind terribly assigning me a fixed IP address so that people can find me at this address from now until the end of time?". Assuming you are with a reasonably accommodating ISP they may do this for free, but usually there is a charge (capitalism, yay!). Here's a random selection of prices for this service from a few common ISPs today:
 
@@ -73,7 +75,7 @@ That's not ideal. So how can the aspiring self-hoster get round this? Well, one 
 
 I have to admit, this picture is quite different from the last time I looked at static IP availability, but it makes sense when you get into it. Static IPs, for the reasons outlined above, should be expensive, like any scarce resource. Also... if you happen to be with Airband because <s>they are the only game in your particular town</s> they are the best, you're faced with paying £12 extra per month for the privilege. That's 3 Happy Meals dammit! That said, the reason they aren't generally even offered to residential customers is mostly due to lack of demand, which itself has decreased even from us nerds, due to a nifty little alternative to static IP addressing called Dynamic DNS (DDNS).
 
-{% include image-link.html image_path="/assets/images/2025/07/28/3_happy_meals.jpg" alt_text="Three Happy Meals" link="#" caption="The monthly cost of a static IP with Airband" width="75%" %}
+{% include image-link.html lightbox="3-happy-meals-1" image_path="/assets/images/2025/07/28/3_happy_meals.jpg" alt_text="Three Happy Meals"  caption="The monthly cost of a static IP with Airband" width="75%" %}
 
 # Dynamic DNS
 
@@ -149,7 +151,7 @@ Traditionally, I might have used something like [OpenVPN](https://openvpn.net/) 
 
 That said, I was interested in trying something different and I'd heard good things about [WireGuard](https://www.wireguard.com/), which claims to use state-of-the-art cryptography ("reviewed by cryptographers"!), to provide a fast and modern VPN that has a much simpler implementation than OpenVPN/OpenSSL. It has also been incorporated into the Linux kernel for the past 5 years which is a good indicator of stability.
 
-{% include image-link.html image_path="/assets/images/2025/07/28/wireguard.svg" alt_text="WireGuard logo" link="#" caption="Also the logo has a dragon!" width="75%" %}
+{% include image-link.html lightbox="wireguard-1" image_path="/assets/images/2025/07/28/wireguard.svg" alt_text="WireGuard logo"  caption="Also the logo has a dragon!" width="75%" %}
 
 
 WireGuard securely encapsulates IP packets over User Datagram Protocol (UDP) to transport its data across the internet. In practice this means that it encapsulates both application data but also the header information containing instructions on where the packet is destined for (and came from). This allows it to be used as a Virtual Private Network (VPN) which means you can securely extend private networks (like internal home or business networks) to anywhere in the world.
@@ -160,7 +162,7 @@ Let's consider two machines on opposite sides of the world that wish to communic
 
 A VPN endpoint has an interface (wg0) which has a public-key, a private-key and listens on a particular UDP port (41414). The interface also has a list of peers, each of which is identified by their public keys and each of which has a list of 'allowed' source IPs.
 
-{% include image-link.html image_path="/assets/images/2025/07/28/wireguard_example.png" alt_text="WireGuard config" link="#" caption="Source: https://www.wireguard.com/papers/wireguard.pdf" width="100%" %}
+{% include image-link.html lightbox="wireguard-example-1" image_path="/assets/images/2025/07/28/wireguard_example.png" alt_text="WireGuard config"  caption="Source: https://www.wireguard.com/papers/wireguard.pdf" width="100%" %}
 
 When this endpoint wants to send a packet to one of these peers, it looks up which Peer Public Key to use, by matching the destination address of the packet with the table above. So for 10.10.10.230, the public key beginning `gN65...` would be used to encrypt the packet.
 
@@ -176,38 +178,48 @@ A VPS is essentially a bit of private space on a reasonably powerful server some
 
 The price of a VPS can be as little as £1 per month. You can pay more money to get more space, additional processing power, etc., but as I'm looking to host everything on a PC at home and just use the VPS as a relay (forwarding requests and their responses), I don't need more than this.
 
-{% include image-link.html image_path="/assets/images/2025/07/28/cheap_vps.png" alt_text="Cheap VPS related image" link="#" caption="You can spend very little on a VPS and domain name" width="50%" %}
+{% include image-link.html lightbox="cheap-vps-1" image_path="/assets/images/2025/07/28/cheap_vps.png" alt_text="Cheap VPS related image"  caption="You can spend very little on a VPS and domain name" width="50%" %}
 
 Renting a VPS gives me a server on the internet with a fixed IP address which I was also able to associate with a domain name I pay around £10 a year to rent. This post is a little long already so I won't go into the details of that, but there are plenty of guides by the VPS/DNS companies themselves. Essentially, I can now type (for example) `http://www.myawesomedomain.xyz` into my browser's address bar, it will go and ask a name resolution service for the associated IP address, which will return that of my VPS. The next step is to use WireGuard, to create an encrypted tunnel from a PC in my home to the VPS, the final link in the chain.
 
-{% include image-link.html image_path="/assets/images/2025/07/28/mywebsite.png" alt_text="Screenshot of a very basic website" link="#" caption="Needs work..." width="75%" %}
+{% include image-link.html lightbox="mywebsite-1" image_path="/assets/images/2025/07/28/mywebsite.png" alt_text="Screenshot of a very basic website"  caption="Needs work..." width="75%" %}
 
 
 ## Installation
 
 So we have a PC in our home network and we have a VPS with a public IP address out there on the internet. That's our two endpoints - let's go through the setup of WireGuard on the VPS side first.
 
-```
+
+{% highlight bash %}
+
 $ sudo apt update
 $ sudo apt install wireguard
-```
+
+{% endhighlight %}
 
 Next you need to generate a public/private keypair for this peer (we'll call this the 'server'):
 
-```
+
+{% highlight bash %}
+
 $ wg genkey | sudo tee /etc/wireguard/private.key
 SSBsaWtlIHlvdXIgdGhpbmtpbmcsIGJ1dCBuby4uLgo=
 $ sudo chmod go= /etc/wireguard/private.key
-```
+
+{% endhighlight %}
 
 The second command removes access permissions to the private key for users and groups other than the root user. Next create the corresponding public key:
 
-```
+
+{% highlight bash %}
+
 $ sudo cat /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key.
 OhIZ0Hiw2A9Xg5SHhriN4XV8/PwqV0sF+bOBKH61I3Y=
-```
+
+{% endhighlight %}
 
 Now that you have your public/private key pair you need to create your WireGuard configuration file as `/etc/wireguard/wg0.conf`. It needs to contain details of the 'server' interface, but also peers which are permitted to connect:
+
 
 ```
 [Interface]
@@ -224,7 +236,9 @@ So our server is listening for peers to connect on UDP/51920. We also have one p
 
 The configuration for a client peer (our PC at home) is very similar. Follow the steps above to install WireGuard, generate a public private key pair and then create a configuration file. The configuration file on the client peer is almost identical, but also needs to contain the IP address of the 'server peer' (VPS) under the 'Endpoint' entry:
 
-```
+
+{% highlight bash %}
+
 [Interface]
 PrivateKey = SSByZWFsbHkgYW0gbWFraW5nIHRoZXNlIHVwLiBob25lc3QK
 Address = 10.0.0.2/32
@@ -235,18 +249,19 @@ AllowedIPs = 0.0.0.0/0
 Endpoint = 123.456.789.10:51920
 PersistentKeepAlive = 25
 
-```
+{% endhighlight %}
 
 Finally, we're ready to fire up the VPN. On both machines we need to enable WireGuard as a service so it starts at boot time and also actually start the service for the first time:
 
-```
+{% highlight bash %}
 sudo systemctl enable wg-quick@wg0.service
 sudo systemctl start wg-quick@wg0.service
-```
+{% endhighlight %}
 
 A quick check using `wg show` will give you the status of the server peer:
 
-```
+{% highlight bash %}
+
 $ sudo wg show
 interface: wg0
   public key: OhIZ0Hiw2A9Xg5SHhriN4XV8/PwqV0sF+bOBKH61I3Y=
@@ -258,11 +273,12 @@ peer: QSBtYWRlIHVwIHB1YmxpYyBrZXkuIHNlcmlvdXNseQo=
   allowed ips: 10.0.0.2/32
   latest handshake: 41 seconds ago
   transfer: 20.65 MiB received, 14.11 MiB sent
-```
+
+{% endhighlight %}
 
 Running the same command on the client peer should give you:
 
-```
+{% highlight bash %}
 interface: wg0
   public key: QSBtYWRlIHVwIHB1YmxpYyBrZXkuIHNlcmlvdXNseQo=
   private key: (hidden)
@@ -275,8 +291,7 @@ peer: OhIZ0Hiw2A9Xg5SHhriN4XV8/PwqV0sF+bOBKH61I3Y=
   latest handshake: 2 minutes, 18 seconds ago
   transfer: 14.11 MiB received, 20.66 MiB sent
   persistent keepalive: every 25 seconds
-
-```
+{% endhighlight %}
 
 Awesome! From our VPS we can now send packets to a PC in our home network via an encrypted tunnel. This has partially achieved the goal of bypassing CGNAT, but we still need to tweak the configuration to allow only specific services (e.g. web traffic) down the tunnel and setup some port forwarding so that when a user connects to a port (e.g. TCP/80) on our VPS, the traffic is automatically sent through the encrypted tunnel to the same port on a PC inside our home network.
 

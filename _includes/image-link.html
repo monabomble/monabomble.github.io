@@ -1,4 +1,9 @@
-<figure style="align: center">
-	<img src="{{ include.image_path }}" id="{{ include.image_id }}" alt="{{ include.alt_text }}" style="display: block; margin: auto; width: {{ include.width }}; height: auto; align: center" />
+<figure style="align: center;">
+
+	<a href="{{ include.image_path }}" data-lightbox="{{ include.lightbox }}" data-title="{{ include.caption }}">
+		<img src="{{ include.image_path }}" title="{{ include.caption }}" style="width:{{ include.width }}">
+</a>
+
+
   <figcaption style="text-align: center;">{{ include.caption }}</figcaption>
 </figure>

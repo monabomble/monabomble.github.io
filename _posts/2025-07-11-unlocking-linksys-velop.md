@@ -2,15 +2,17 @@
 layout: post
 title:  "Unlocking a Linksys Velop Router"
 subtitle: "Debranding the MX4200"
+author: Andy
+category: networking
 date: 2025-07-11 20:00:00
-background: '/assets/images/2025/07/11/linksys_velop.jpg'
+cover: '/assets/images/2025/07/11/linksys_velop.jpg'
 ---
 
 # Background
 
 A couple of years back I changed my Fibre provider and received a new [Linksys Velop MX4200 router](https://support.linksys.com/kb/article/952-en/) as part of my contract. This worked *just fine* unless I wanted to do some administration on my network, in which case I could either use the "fairly terrible" web interface or the mania-inducing, eyeball-gougingly awful Linksys Android app (I'm not sure if the iOS app is any better). Every action seems to take an age to complete (if it completes at all) and it just defies logic as to how a company which was at one time valued at $500M can release such crap. I lived with it for a while, but once I started adding nodes to my mesh and wanted to troubleshoot some wireless issues, it was clear I couldn't achieve this with the Linksys administration tools.
 
-{% include image-link.html image_path="/assets/images/2025/07/11/velop.jpg" alt_text="The Linksys Velop MX4200" link="https://support.linksys.com/kb/article/952-en/" caption="The Linksys Velop MX4200" width="35%" %}
+{% include image-link.html lightbox="velop-1" image_path="/assets/images/2025/07/11/velop.jpg" alt_text="The Linksys Velop MX4200"  caption="The Linksys Velop MX4200" width="35%" %}
 
 I'd used [OpenWRT](https://openwrt.org/) for other routers in the past and I was pleased to see that it had been ported to the MX4200. OpenWRT is a Linux-based embedded operating system which is highly customisable and provides full package management and baked in remote administration for more technically-minded users. Not only that, but it is excellent for diagnostics. I decided to flash all my nodes with the latest stable version (24.10.1) and all my troubles would go away...
 
@@ -19,11 +21,11 @@ I'd used [OpenWRT](https://openwrt.org/) for other routers in the past and I was
 Now the first MX4200 I tried was simple. You can download official firmware files from the [product page](https://support.linksys.com/kb/article/952-en/) and then use the existing web administration tool (at https://192.168.1.1) to upgrade the firmware. You can do this by logging in, clicking `Connectivity` under `Router Settings` and then simply use the `Choose File` button to select the firmware file you wish to flash. Great. This was going to be a breeze.
 
 
-{% include image-link.html image_path="/assets/images/2025/07/11/linksys_firmware_update.png" alt_text="The Linksys firmware update screen" link="#" caption="Simples?" width="75%" %}
+{% include image-link.html lightbox="firmware-update-1" image_path="/assets/images/2025/07/11/linksys_firmware_update.png" alt_text="The Linksys firmware update screen" caption="Simples?" width="75%" %}
 
 Flushed with success, I then tried the OpenWRT firmware which is available from the [MX4200 product page on the OpenWRT site](https://openwrt.org/toh/linksys/mx4200_v1_and_v2). This also worked just fine and I was excited to find some nifty graphs regarding wireless signal strength.
 
-{% include image-link.html image_path="/assets/images/2025/07/11/wireless_graphs.png" alt_text="OpenWRT's Wireless status page" link="#" caption="Who doesn't love a graph?" width="75%" %}
+{% include image-link.html lightbox="wireless-graphs-1" image_path="/assets/images/2025/07/11/wireless_graphs.png" alt_text="OpenWRT's Wireless status page"  caption="Who doesn't love a graph?" width="50%" %}
 
 Then I tried to apply the same steps to the second router, after all, it was the exact same hardware and software as the first, right? Well, as it turns out that was wrong. The other two routers were "ISP branded" which means you can't flash regular or "retail" Linksys firmware and certainly not custom firmware (like OpenWRT).
 
@@ -31,7 +33,7 @@ As a side note, this is just plain wrong. Off-the-shelf consumer routers don't h
 
 I tried to update the device by flashing an official Linksys firmware (legit surely) and was greeted with this pop up:
 
-{% include image-link.html image_path="/assets/images/2025/07/11/invalid_firmware_file.png" alt_text="Invalid firmware file popup" link="#" caption="Computer says no" width="75%" %}
+{% include image-link.html lightbox="invalid-firwmare-file-1" image_path="/assets/images/2025/07/11/invalid_firmware_file.png" alt_text="Invalid firmware file popup"  caption="Computer says no" width="50%" %}
 
 Wtf? I have automatic updates turned on and I can tell you that the ISP provided firmware hadn't been updated since I first switched the thing on a couple of years back. That's not good.
 
@@ -51,7 +53,7 @@ There were also a few posts commenting that you could upgrade via the `/fwupgrad
 
 One chap did come along with [a solution to the locked ISP firmware](https://github.com/ishi0/Community-Fibre-WHW03CFv2/wiki) early on. If you went to the hidden 'CA settings' menu you could apply a retail firmware to de-brand the device, and then you'd be able to upgrade to OpenWRT. Unfortunately, for me and others, this didn't appear to work for my ISP firmware in 2025. One post in particular summed it up nicely:
 
-{% include image-link.html image_path="/assets/images/2025/07/11/sadly.png" alt_text="Reddit post saying the old method doesn't work any more" link="#" caption="I'm in complete agreement" width="75%" %}
+{% include image-link.html lightbox="sadly-1" image_path="/assets/images/2025/07/11/sadly.png" alt_text="Reddit post saying the old method doesn't work any more"  caption="I'm in complete agreement" width="75%" %}
 
 What we have here is a genuine requirement! I have a bit of a background in poking around with embedded devices, so I thought I could take a quick look.
 
@@ -61,12 +63,12 @@ After 20 minutes of trying to work out where the join was on this case so I coul
 
 On a new device I'd start looking for different types of pins and workout what voltage the board is at before probing various parts with a multimeter or mini oscilloscope to work out if any pins could have digital data across them. However, in this case I didn't have to, as the OpenWRT page for the device provided details on a usable [UART debug interface](https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter). The page also has photos and diagrams illustrating which of the UART pins in the image below were ground, power, receive and transmit.
 
-{% include image-link.html image_path="/assets/images/2025/07/11/mx4200v1-serial.jpeg" alt_text="UART header pins" link="#" caption="So convenient (Copyright: openwrt.org)" width="75%" %}
+{% include image-link.html lightbox="mx4200v1-serial-1" image_path="/assets/images/2025/07/11/mx4200v1-serial.jpeg" alt_text="UART header pins"  caption="So convenient (Copyright: openwrt.org)" width="50%" %}
 
 The simplest way to make use of these pins is to buy a cheap UART-to-serial USB adaptor [like this one](https://www.amazon.co.uk/dp/B07TXVRQ7V).
 
 
-{% include image-link.html image_path="/assets/images/2025/07/11/uart-adaptor.jpg" alt_text="UART-to-serial USB adaptor" link="#" caption="A simple way to connect to UART interfaces" width="50%" %}
+{% include image-link.html lightbox="uart-adaptor-1" image_path="/assets/images/2025/07/11/uart-adaptor.jpg" alt_text="UART-to-serial USB adaptor"  caption="A simple way to connect to UART interfaces" width="50%" %}
 
 On the adaptor, note the 6 labelled pins opposite the USB male end. These can be easily connected to using female-to-female push fit connectors (known as [Dupont cables](https://www.amazon.co.uk/Dupont-Female-Solderless-Breadboard-Connectors/dp/B0BLZC3SQ2)). First you can use a cable to link the ground pins on the PCB and your adaptor. You then connect the TX (transmit) pin from the MX4200 to the RX (receive) pin on your adaptor. Finally you connect the RX pin from the MX4200 to the TX pin on your adaptor. In this case you can ignore the VCC (power) pin as the MX4200 PCB will provide the power itself. With these 3 pins connected you can plug the USB end of the adaptor into your computer.
 
